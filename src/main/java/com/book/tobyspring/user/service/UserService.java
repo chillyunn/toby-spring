@@ -16,10 +16,10 @@ import java.util.List;
 
 public class UserService {
     UserDao userDao;
-    private DataSource dataSource;
+    private PlatformTransactionManager transactionManager;
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
     }
 
     public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
@@ -30,9 +30,6 @@ public class UserService {
     }
 
     public void upgradeLevels() throws Exception{
-        PlatformTransactionManager transactionManager =
-                new DataSourceTransactionManager(dataSource);
-
         TransactionStatus status
                 = transactionManager.getTransaction(new DefaultTransactionDefinition());
         try {
