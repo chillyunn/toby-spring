@@ -3,6 +3,7 @@ package com.book.tobyspring.user.service;
 import com.book.tobyspring.Level;
 import com.book.tobyspring.user.User;
 import com.book.tobyspring.user.dao.UserDao;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -23,17 +24,21 @@ import java.util.Properties;
 public class UserService {
     UserDao userDao;
     private PlatformTransactionManager transactionManager;
-
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
-    public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
-    public static final int MIN_RECOMMEND_FOR_GOLD = 30;
+    private MailSender mailSender;
 
     public void setUserDao(UserDao userDao) {
         this.userDao = userDao;
     }
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    public void setMailSender(MailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
+    public static final int MIN_RECOMMEND_FOR_GOLD = 30;
 
     public void upgradeLevels() throws Exception {
         TransactionStatus status
@@ -73,9 +78,6 @@ public class UserService {
     }
 
     private void sendUpgradeEmail(User user) {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("mail.server.com");
-
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(user.getEmail());
         mailMessage.setFrom("useradmin@ksug.org");
