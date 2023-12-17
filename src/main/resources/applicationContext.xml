@@ -23,8 +23,8 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-        <property name="host" value="mail.server.com"/>
+    <bean id="mailSender" class="com.book.tobyspring.user.service.DummyMailSender">
+
     </bean>
 
 </beans>
