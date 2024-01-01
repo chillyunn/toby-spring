@@ -13,9 +13,11 @@
         <property name="jdbcTemplate" ref="dataSource"/>
     </bean>
 
-    <bean id="userService" class="com.book.tobyspring.user.service.UserServiceTx">
+    <bean id="userService" class="com.book.tobyspring.user.service.TxProxyFactoryBean">
+        <property name="target" ref="userServiceImpl"/>
         <property name="transactionManager" ref="transactionManger"/>
-        <property name="userService" ref="userServiceImpl"/>
+        <property name="pattern" value="upgradeLevels"/>
+        <property name="serviceInterface" value="com.book.tobyspring.user.service.UserService"/>
     </bean>
 
     <bean id="userServiceImpl" class="com.book.tobyspring.user.service.UserServiceImpl">

@@ -3,7 +3,6 @@ package com.book.tobyspring;
 import com.book.tobyspring.user.User;
 import com.book.tobyspring.user.dao.UserDao;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
