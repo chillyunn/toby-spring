@@ -31,4 +31,9 @@
 
     </bean>
 
+    <bean id="message" class="com.book.tobyspring.factorybean.MessageFactoryBean">
+        <property name="text" value="Factory Bean"/>
+
+    </bean>
+
 </beans>
