@@ -135,5 +135,35 @@ InvocationTargetException 으로 받은 후 getTargetException() 메서드로 �
 팩토리 빈이란 스프링을 대신해서 오브젝트의 생성로직을 담당하도록 만들어진 특별한 빈이다.
 FactoryBean 인터페이스를 구현한 클래스를 스프링의 빈으로 등록하면 팩토리 빈으로 동작한다.
 
+MehotdInterceptor로는 메소드 정보와 함께 타깃 오브젝트가 탐긴 MethodInvocation 오브젝트가 전달된다.
+MethodInvocation은 타깃 오브젝트의 메소드를 실행할 수 있는 기능이 있기 때문에
+MethodInterceptor는 부가기능을 제공하는 데만 집중할 수 있따.
+MethodInvocation은 일종의 콜백 오브젝트로, proceed() 메소드를 실행 시 타깃 오브젝트의 메소드를 내부적으로 실행해준다.
+MethodInvocation 구현 클래스는 일종의 공유 가능한 템플릿처럼 동작한다.
+=> JDK dynamic proxy를 직접 사용하는 코드와 ProxyFactoryBean을 직접 사용하는 코드의 가장 큰 차이점이자 장점.
+ProxyFactoryBean은 가장 작은단위의 템플릿/콜백 구조를 으용해서 적용했기 때문에 템플릿 역할을 하는 MethodInvocation을 싱글톤으로 두고 공유 가능함.
+JdbcTemplate가 SQL 파라미터 정보에 종속되지 않아 수많은 DAO 메소드가 하나의 JdbcTemplate를 공유할 수 있는 것과 같다.
+ProxyFactoryBean에는 여러 개의 MethodInterceptor를 추가할 수있다.
+=> ProxyFactoryBean 하나만으로 여러 개의 부가기능을 제공해주는 프록시를 만들 수 있다.
+=> 새로운 부가기능을 추가할 때마다 프록시와 프록시 팩토리 빈도 추가해줘야 한다는 문제 해결
+advice: MethodInterceptor처럼 타깃 오브젝트에 적용하는 부가기능을 담은 오브젝트. 타깃 오브젝트에 종속되지 않는 순수한 부가기능을 담은 오브젝트.
+ProxyFactoryBean은 다이내믹 프록시와 달리 프록시가 구현해야 하는 인터페이스를 제공받지 않는다.
+setInterfaces()를 통해 구현해야 할 인터페이스를 지정할 수 있지만, 자동으로 타깃 오브젝트가 구현하고 있는 인터페이스 정보를 알아내어 구현한다.
 
+ProxyFactoryBean과 MethodInterceptor를 사용하는 방식에서 메소드 선정 기능을 사용하는 법
+MethodInterceptor는 타깃 정보를 갖고 있지 않아 싱글톤 빈으로 등록 가능
+-> 트랜잭션 적용 대상 메소드 이름 패턴을 넣어주면 안됨
+-> MethodInterceptor에는 재사용 가능한 순수한 부가기능 제공 코드만 남기고, 프록시에 부가기능 적용 메소드를 선택하는 기능 추가하기.
+-> 프록시의 핵심 가치는 타깃을 대신해서 클라이언트의 요청을 받아 처리하는 오브젝트
+-> 메소드를 선별하는 기능을 프록시로부터 다시 분리하는 편이 낫다 -> 전략패턴 적용가능
 
+ProxyFactoryBean은 두가지 확장 기능은 Advice와 Pointcut을 활용한다.
+advice: 부가기능ㅇ르 제공하는 오브젝트
+pointcut: 메소드 선정 알고리즘을 담은 오브젝트
+두 가지 모두 여러 프록시에서 공유 가능하도록 만들어지기 때문에 싱글톤 빈으로 등록 가능하다.
+
+클라이언트 -> 프록시 -> 포인트컷 -> 어드바이스(MethodInterceptor) -> Invocation 콜백 -> 타깃 오브젝트
+
+여러 프록시가 공유 가능, 구체적인 부가기능 방식이나 메소드 선정 알고리즘이 바뀌면 구현 클래스만 바꿔서 설정에 넣으면 됨 => OCP를 지키는 구조.
+addAdvisor(pointcut,advice)를 통해 어떤 어드바이스에 대해 어떤 포인트컷을 적용할 지 선택한다.
+어드바이저:포인트컷(메소드 선정 알고리즘) + 어드바이스(부가기능)
