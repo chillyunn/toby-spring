@@ -1,7 +1,6 @@
 package com.book.tobyspring.user.service;
 
 import com.book.tobyspring.Level;
-import com.book.tobyspring.learningtest.jdk.TransactionHandler;
 import com.book.tobyspring.user.User;
 import com.book.tobyspring.user.dao.MockUserDao;
 import com.book.tobyspring.user.dao.UserDao;
@@ -22,7 +21,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +37,7 @@ class UserServiceTest {
     @Autowired
     UserService userService;
     @Autowired
-    UserServiceImpl userServiceImpl;
+    UserService testUserService;
     @Autowired
     DataSource dataSource;
     @Autowired
@@ -124,6 +122,7 @@ class UserServiceTest {
     }
 
     @Test
+
     public void mockUpgradeLevels() throws Exception {
         UserServiceImpl userServiceImpl = new UserServiceImpl();
 
@@ -170,29 +169,24 @@ class UserServiceTest {
     }
 
     @Test
-    @DirtiesContext
     void upgradeAllOrNothing() throws Exception {
-        UserServiceImpl.TestUserService testUserService = new UserServiceImpl.TestUserService(users.get(3).getId());
-        testUserService.setUserDao(this.userDao);
-        testUserService.setMailSender(mailSender);
-
-        ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", ProxyFactoryBean.class);
-        txProxyFactoryBean.setTarget(testUserService);
-
-        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
-
         userDao.deleteAll();
         for (User user : users) {
             userDao.add(user);
         }
 
         try {
-            txUserService.upgradeLevels();
+            this.testUserService.upgradeLevels();
             Assertions.fail("TestUserServiceException expected");
-        } catch (UserServiceImpl.TestUserService.TestUserServiceException e) {
+        } catch (UserServiceImpl.TestUserServiceImpl.TestUserServiceException e) {
 
         }
 
         checkLevelUpgrade(users.get(1), false);
+    }
+
+    @Test
+    public void advisorAutoProxyCreator() {
+        assertThat(testUserService).isInstanceOf(java.lang.reflect.Proxy.class);
     }
 }

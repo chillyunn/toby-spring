@@ -5,9 +5,6 @@ import com.book.tobyspring.user.User;
 import com.book.tobyspring.user.dao.UserDao;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
 
@@ -72,12 +69,8 @@ public class UserServiceImpl implements UserService {
         userDao.add(user);
     }
 
-    static class TestUserService extends UserServiceImpl {
-        private String id;
-
-        TestUserService(String id) {
-            this.id = id;
-        }
+    static class TestUserServiceImpl extends UserServiceImpl {
+        private String id = "madnite1";
 
         protected void upgradeLevel(User user) {
             if (user.getId().equals(this.id)) {

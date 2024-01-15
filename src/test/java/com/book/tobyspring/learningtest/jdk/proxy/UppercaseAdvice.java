@@ -1,5 +1,6 @@
 package com.book.tobyspring.learningtest.jdk.proxy;
 
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
