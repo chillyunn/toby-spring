@@ -206,3 +206,10 @@ transactionAdvisor빈은 DefaultAdvisorAutoProxyCreator 덕분에 ProxyFactoryBe
 리플렉션 API를 통해 클래스와 메소드의 이름,패키지,파라미턴,리턴 값,애노테이션,구현한 인터페이스,상속한 클래스 등의 정보를 알 수 있다.
 하지만 리플렉션 API는 코드를 작성하기가 번거롭고 조건이 달라질 때마다 포인트컷 구현 코드를 수정해야한다.
 2. 포인트컷 표현식: 스프링이 제공해주는 표현식 언어를 사용해서 포인트컷을 작성할 수 있는 방법.
+
+포인트컷 표현식
+AspectJExpressionPointCut 클래스 사용.
+Pointcut 인터페이스를 구현해야 하는 스프링의 포인트컷은 클래스 선정을 위한 클래스 필터와 메소드 선정을 위한 메소드 매처를 각각 제공해야 한다.
+NameMatchClassMethodPointcut은 클래스와 메소드의 이름패턴을 독립적으로 비교하도록 만들어져 있다.
+AspectJExpressionPointcut은 클래스와 메소드의 선정 알고리즘을 포인트컷 표현식을 이용해 한 번에 지정할 수 있게 해준다.
+
