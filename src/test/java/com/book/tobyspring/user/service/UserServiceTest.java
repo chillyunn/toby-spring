@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -29,6 +30,7 @@ import static com.book.tobyspring.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_
 import static com.book.tobyspring.user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -122,7 +124,6 @@ class UserServiceTest {
     }
 
     @Test
-
     public void mockUpgradeLevels() throws Exception {
         UserServiceImpl userServiceImpl = new UserServiceImpl();
 
@@ -188,5 +189,12 @@ class UserServiceTest {
     @Test
     public void advisorAutoProxyCreator() {
         assertThat(testUserService).isInstanceOf(java.lang.reflect.Proxy.class);
+    }
+
+    @Test()
+    public void readOnlyTransactionAttribute() {
+        assertThrows(TransientDataAccessResourceException.class, ()->{
+            testUserService.getAll();
+        });
     }
 }

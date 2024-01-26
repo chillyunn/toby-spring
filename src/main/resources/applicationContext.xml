@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
         <property name="driverClass" value="com.mysql.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://localhost/toby?characterEncoding=UTF-8"/>
         <property name="username" value="root"/>
         <property name="password" value="1234"/>
     </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <aop:config>
+        <aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)"/>
+        <!--        <aop:advisor advice-ref="batchTxAdvice" pointcut="execution(a.b.*BatchJob.*.(..))"/>-->
+    </aop:config>
+
+    <tx:advice id="transactionAdvice">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*" />
+        </tx:attributes>
+    </tx:advice>
 
     <bean id="userDao" class="com.book.tobyspring.user.dao.UserDaoJdbc">
         <property name="jdbcTemplate" ref="dataSource"/>
@@ -18,9 +42,7 @@
         <property name="mailSender" ref="mailSender"/>
     </bean>
 
-    <bean id="transactionManger" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
+
 
     <bean id="mailSender" class="com.book.tobyspring.user.service.DummyMailSender">
 
@@ -28,38 +50,77 @@
 
     <bean id="message" class="com.book.tobyspring.factorybean.MessageFactoryBean">
         <property name="text" value="Factory Bean"/>
-
     </bean>
 
-<!--    <bean id="transactionAdvice" class="com.book.tobyspring.user.service.TransactionAdvice">-->
+<!--    <bean id="transactionAdvice" class="org.springframework.transaction.interceptor.TransactionInterceptor">-->
 <!--        <property name="transactionManager" ref="transactionManger"/>-->
+<!--        <property name="transactionAttributes">-->
+<!--                <props>-->
+<!--                    <prop key="get*">PROPAGATION_REQUIRED,readOnly, timeout_30</prop>-->
+<!--                    <prop key="upgrade*">PROPAGATION_REQUIRES_NEW,ISOLATION_SERIALIZABLE</prop>-->
+<!--                    <prop key="*">PROPAGATION_REQUIRED</prop>-->
+<!--                </props>-->
+<!--        </property>-->
 <!--    </bean>-->
-    <bean id="transactionAdvice" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-        <property name="transactionManager" ref="transactionManger"/>
-        <property name="transactionAttributes">
-                <props>
-                    <prop key="get*">PROPAGATION_REQUIRED,readOnly, timeout_30</prop>
-                    <prop key="upgrade*">PROPAGATION_REQUIRES_NEW,ISOLATION_SERIALIZABLE</prop>
-                    <prop key="*">PROPAGATION_REQUIRED</prop>
-                </props>
-        </property>
-    </bean>
 
-    <bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
-        <property name="mappedName" value="upgrade*"/>
-    </bean>
+        <!--1. 가장 단순한 디폴트 속성, 개발이 진행됨에 따라 단계적으로 속성을 추가해주면 된다.-->
+<!--    <tx:advice id="transactionAdvice" transaction-manager="transactionManger">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="*" />-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
 
-    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-        <property name="advice" ref="transactionAdvice"/>
-        <property name="pointcut" ref="transactionPointcut"/>
-    </bean>
+    <!--2. 간단한 메소드 이름의 패턴 적용 ex)조회전용 메소드에 읽기전용 속성 부여-->
+<!--    <tx:advice id="transactionAdvice" transaction-manager="transactionManger">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="get*" read-only="true"/>-->
+<!--            <tx:method name="*"/>-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
 
-    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
 
-    <bean id="transactionPointcut" class="com.book.tobyspring.learningtest.jdk.proxy.NameMatchClassMethodPointcut">
+
+<!--    <tx:advice id="transactionAdvice" transaction-manager="transactionManger">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="get*" propagation="REQUIRED" read-only="true" timeout="30"/>-->
+<!--            <tx:method name="upgrade*" propagation="REQUIRES_NEW" isolation="SERIALIZABLE"/>-->
+<!--            <tx:method name="*" propagation="REQUIRED"/>-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+<!--트랜잭션의 성격이 많이 다른 배치 작업용 클래스를 위한 별도의 어드바이스, 독자적인 트랜잭션 속성 정의-->
+<!--    <tx:advice id="batchTxAdvice">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name=""/>-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+
+    <!--<bean>을 이용한 트랜잭션 어드바이스 등록-->
+<!--    <bean id="transactionAdvice" class="org.springframework.transaction.interceptor.TransactionInterceptor">-->
+<!--        <property name="transactionManager" ref="transactionManger"/>-->
+<!--        <property name="transactionAttributes">-->
+<!--            <props>-->
+<!--                <prop key="get*">PROPAGATION_REQUIRED, readOnly</prop>-->
+<!--                <prop key="*">PROPAGATION_REQUIRED</prop>-->
+<!--            </props>-->
+<!--        </property>-->
+<!--    </bean>-->
+    <!--tx 스키마를 이용한 트랜잭션 어드바이스 등록-->
+
+
+    <!--<bean id="transactionPointcut" class="com.book.tobyspring.learningtest.jdk.proxy.NameMatchClassMethodPointcut">
         <property name="mappedClassName" value="*ServiceImpl"/>
         <property name="mappedName" value="upgrade*"/>
-    </bean>
+    </bean>-->
 
+<!--    <bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">-->
+<!--        <property name="mappedName" value="upgrade*"/>-->
+<!--    </bean>-->
+
+<!--    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">-->
+<!--        <property name="advice" ref="transactionAdvice"/>-->
+<!--        <property name="pointcut" ref="transactionPointcut"/>-->
+<!--    </bean>-->
+
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
     <bean id="testUserService" class="com.book.tobyspring.user.service.UserServiceImpl$TestUserServiceImpl" parent="userService" />
 </beans>

@@ -69,6 +69,26 @@ public class UserServiceImpl implements UserService {
         userDao.add(user);
     }
 
+    @Override
+    public User get(String id) {
+        return userDao.get(id);
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userDao.getAll();
+    }
+
+    @Override
+    public void deleteAll() {
+        userDao.deleteAll();
+    }
+
+    @Override
+    public void update(User user) {
+        userDao.update(user);
+    }
+
     static class TestUserServiceImpl extends UserServiceImpl {
         private String id = "madnite1";
 
@@ -78,6 +98,14 @@ public class UserServiceImpl implements UserService {
             }
             super.upgradeLevel(user);
         }
+
+        public List<User> getAll(){
+            for(User user: super.getAll()) {
+                super.update(user);
+            }
+            return null;
+        }
+
 
         static class TestUserServiceException extends RuntimeException {
         }
