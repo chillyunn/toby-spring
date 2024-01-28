@@ -16,10 +16,15 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -35,6 +40,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
+@Commit
 class UserServiceTest {
     @Autowired
     UserService userService;
@@ -196,5 +202,28 @@ class UserServiceTest {
         assertThrows(TransientDataAccessResourceException.class, ()->{
             testUserService.getAll();
         });
+    }
+
+    @Test
+    @Transactional(readOnly = true)
+    @Rollback(value = false)
+    void transactionSync() {
+        //userService.deleteAll();
+        userDao.deleteAll();
+        assertThat(userDao.getCount()).isEqualTo(0);
+
+        DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+        //txDefinition.setReadOnly(true);
+        TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
+
+//        try {
+            userService.add(users.get(0));
+            userService.add(users.get(1));
+            assertThat(userDao.getCount()).isEqualTo(2);
+//        }finally {
+//            transactionManager.rollback(txStatus);
+//        }
+
+        assertThat(userDao.getCount()).isEqualTo(0);
     }
 }

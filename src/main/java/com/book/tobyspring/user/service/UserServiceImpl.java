@@ -5,9 +5,10 @@ import com.book.tobyspring.user.User;
 import com.book.tobyspring.user.dao.UserDao;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+@Transactional
 public class UserServiceImpl implements UserService {
     UserDao userDao;
     private MailSender mailSender;

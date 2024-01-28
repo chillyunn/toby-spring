@@ -21,17 +21,19 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <aop:config>
-        <aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)"/>
-        <!--        <aop:advisor advice-ref="batchTxAdvice" pointcut="execution(a.b.*BatchJob.*.(..))"/>-->
-    </aop:config>
+<!--    <aop:config>-->
+<!--        <aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)"/>-->
+<!--        &lt;!&ndash;        <aop:advisor advice-ref="batchTxAdvice" pointcut="execution(a.b.*BatchJob.*.(..))"/>&ndash;&gt;-->
+<!--    </aop:config>-->
 
-    <tx:advice id="transactionAdvice">
-        <tx:attributes>
-            <tx:method name="get*" read-only="true"/>
-            <tx:method name="*" />
-        </tx:attributes>
-    </tx:advice>
+<!--    <tx:advice id="transactionAdvice">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="get*" read-only="true"/>-->
+<!--            <tx:method name="*" />-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+
+    <tx:annotation-driven />
 
     <bean id="userDao" class="com.book.tobyspring.user.dao.UserDaoJdbc">
         <property name="jdbcTemplate" ref="dataSource"/>
